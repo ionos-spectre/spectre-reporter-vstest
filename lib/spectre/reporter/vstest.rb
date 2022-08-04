@@ -7,6 +7,8 @@ require 'securerandom'
 module Spectre
   module Reporter
     class VSTest
+      VERSION = '1.0.0'
+
       def initialize config
         @config = config
         @date_format = '%FT%T.%L'
