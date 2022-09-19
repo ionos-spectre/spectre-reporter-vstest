@@ -67,7 +67,7 @@ module Spectre
           if run_info.failed?
             outcome = 'Failed'
           elsif run_info.error?
-            outcome = 'Error'
+            outcome = 'Failed'
           elsif run_info.skipped?
             outcome = 'Skipped'
           else
