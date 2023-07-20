@@ -9,7 +9,7 @@ require 'spectre/reporter'
 module Spectre
   module Reporter
     class VSTest
-      VERSION = '1.0.1'
+      VERSION = '1.0.2'
 
       def initialize config
         @config = config
