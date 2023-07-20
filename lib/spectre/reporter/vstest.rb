@@ -1,6 +1,8 @@
 require 'cgi'
 require 'socket'
 require 'securerandom'
+require 'spectre'
+require 'spectre/reporter'
 
 # Azure mappings: https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/test/publish-test-results?view=azure-devops&tabs=trx%2Cyaml
 
@@ -165,6 +167,10 @@ module Spectre
         run_name += " - #{run_info.spec.context.__desc} -" unless run_info.spec.context.__desc.nil?
         run_name += " #{run_info.spec.desc}"
         run_name
+      end
+
+      Spectre.register do |config|
+        Spectre::Reporter.add VSTest.new(config)
       end
     end
   end
