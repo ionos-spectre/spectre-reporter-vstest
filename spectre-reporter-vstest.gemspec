@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "lib/spectre/reporter/vstest"
-
 Gem::Specification.new do |spec|
   spec.name          = "spectre-reporter-vstest"
   spec.version       = "1.0.3"
