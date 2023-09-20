@@ -4,7 +4,7 @@ require_relative "lib/spectre/reporter/vstest"
 
 Gem::Specification.new do |spec|
   spec.name          = "spectre-reporter-vstest"
-  spec.version       = Spectre::Reporter::VSTest::VERSION
+  spec.version       = "1.0.3"
   spec.authors       = ["Christian Neubauer"]
   spec.email         = ["christian.neubauer@ionos.com"]
 
