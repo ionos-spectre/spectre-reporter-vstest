@@ -98,7 +98,11 @@ module Spectre
             end
 
             run_info.log.each do |timestamp, message, level, name|
-              log_str += %{#{timestamp.strftime(@date_format)} #{level.to_s.upcase} -- #{name}: #{CGI::escapeHTML(message.to_s)}\n}
+              log_text = message.to_s
+                .force_encoding("ISO-8859-1")
+                .encode("UTF-8")
+
+              log_str += %{#{timestamp.strftime(@date_format)} #{level.to_s.upcase} -- #{name}: #{CGI::escapeHTML(log_text)}\n}
             end
 
             xml_str += log_str
