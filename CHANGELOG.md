@@ -1,4 +1,4 @@
-## [1.0.4] - 2024-01-16
+## [1.0.4,1.0.5] - 2024-01-16
 
 - bug fix for frozenError - dup the message object for enforcing the encoding
 
