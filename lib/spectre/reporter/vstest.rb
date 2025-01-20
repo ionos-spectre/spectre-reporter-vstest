@@ -31,7 +31,7 @@ module Spectre
         # Write summary with file attachments
         xml_str += '<ResultSummary>'
         xml_str += '<ResultFiles>'
-        xml_str += %{<ResultFile path="#{File.absolute_path(@config['log_file'])}"></ResultFile>} if File.exists? @config['log_file']
+        xml_str += %{<ResultFile path="#{File.absolute_path(@config['log_file'])}"></ResultFile>} if File.exist? @config['log_file']
 
         report_files = Dir[File.join(@config['out_path'], '*')]
 
