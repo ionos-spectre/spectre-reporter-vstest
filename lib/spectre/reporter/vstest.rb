@@ -160,7 +160,7 @@ module Spectre
         xml_str += '</TestRun>'
 
 
-        Dir.mkdir(@config['out_path']) unless Dir.exists? @config['out_path']
+        Dir.mkdir(@config['out_path']) unless Dir.exist? @config['out_path']
 
         file_path = File.join(@config['out_path'], "spectre-vstest_#{now.strftime('%s')}.trx")
 
