@@ -1,8 +1,6 @@
 require 'cgi'
 require 'socket'
 require 'securerandom'
-require 'spectre'
-require 'spectre/reporter'
 
 # Azure mappings: https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/test/publish-test-results?view=azure-devops&tabs=trx%2Cyaml
 
@@ -47,13 +45,13 @@ module Spectre
 
         # Write test definitions
         test_definitions = run_infos
-          .sort_by { |x| x.spec.name }
+          .sort_by { |x| x.parent.name }
           .map { |x| [SecureRandom.uuid, SecureRandom.uuid, x] }
 
         xml_str += '<TestDefinitions>'
         test_definitions.each do |test_id, execution_id, run_info|
           xml_str += %(<UnitTest name="#{CGI.escapeHTML get_name(run_info)}" \
-            storage="#{CGI.escapeHTML(run_info.spec.file.to_s)}" id="#{test_id}">)
+            storage="#{CGI.escapeHTML(run_info.parent.file.to_s)}" id="#{test_id}">)
           xml_str += %(<Execution id="#{execution_id}" />)
           xml_str += '</UnitTest>'
         end
@@ -62,11 +60,11 @@ module Spectre
         # Write test results
         xml_str += '<Results>'
         test_definitions.each do |test_id, execution_id, run_info|
-          duration_str = Time.at(run_info.duration).gmtime.strftime('%T.%L')
+          duration_str = Time.at(run_info.finished - run_info.started).gmtime.strftime('%T.%L')
 
-          outcome = if run_info.failed? or run_info.error?
+          outcome = if [:failed, :error].include? run_info.status
                       'Failed'
-                    elsif run_info.skipped?
+                    elsif run_info.status == :skipped
                       'Skipped'
                     else
                       'Passed'
@@ -81,7 +79,7 @@ module Spectre
             endTime="#{run_info.finished.strftime(@date_format)}" \
             outcome="#{outcome}">)
 
-          if run_info.log.any? or run_info.failed? or run_info.error?
+          if run_info.logs.any?
             xml_str += '<Output>'
 
             # Write log entries
@@ -100,7 +98,7 @@ module Spectre
               log_str += "data: #{data_str}\n"
             end
 
-            run_info.log.each do |timestamp, message, level, name|
+            run_info.logs.each do |timestamp, level, progname, _corr_id, message|
               log_text = ''
               begin
                 log_text = message.dup.to_s
@@ -110,32 +108,35 @@ module Spectre
                 puts "ERROR in VSTEST - see message : #{message}"
               end
 
-              log_str += %(#{timestamp.strftime(@date_format)} #{level.to_s.upcase} -- \
-                #{name}: #{CGI.escapeHTML(log_text)}\n)
+              log_str += %(#{timestamp} #{level.to_s.upcase} -- \
+                #{progname}: #{CGI.escapeHTML(log_text)}\n)
             end
 
             xml_str += log_str
             xml_str += '</StdOut>'
 
             # Write error information
-            if run_info.failed? or run_info.error?
+            if [:failed, :error].include? run_info.status
               xml_str += '<ErrorInfo>'
 
-              if run_info.failed? and !run_info.failure.cause
+              if run_info.status == :failed
                 xml_str += '<Message>'
 
-                failure_message = "Expected #{run_info.failure.expectation}"
-                failure_message += " with #{run_info.data}" if run_info.data
-                failure_message += ' but it failed'
-                failure_message += " with message: #{run_info.failure.message}" if run_info.failure.message
+                failure_message = ''
+
+                run_info.evaluations.each do |evaluation|
+                  evaluation.failures.each do |failure|
+                    failure_message += "#{evaluation.desc}, but #{failure.message}<br/>"
+                  end
+                end
 
                 xml_str += CGI.escapeHTML(failure_message)
 
                 xml_str += '</Message>'
               end
 
-              if run_info.error or (run_info.failed? and run_info.failure.cause)
-                error = run_info.error || run_info.failure.cause
+              if run_info.status == :error
+                error = run_info.error
 
                 failure_message = error.message
 
@@ -173,14 +174,8 @@ module Spectre
       private
 
       def get_name run_info
-        run_name = "[#{run_info.spec.name}] #{run_info.spec.subject.desc}"
-        run_name += " - #{run_info.spec.context.__desc} -" unless run_info.spec.context.__desc.nil?
-        run_name += " #{run_info.spec.desc}"
-        run_name
-      end
-
-      Spectre.register do |config|
-        Spectre::Reporter.add VSTest.new(config)
+        parent = run_info.parent
+        "[#{parent.name}] #{parent.full_desc}"
       end
     end
   end
