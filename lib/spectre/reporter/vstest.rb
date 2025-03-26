@@ -127,7 +127,7 @@ module Spectre
 
                 run_info.evaluations.each do |evaluation|
                   evaluation.failures.each do |failure|
-                    failure_message += "#{evaluation.desc}, but #{failure.message}<br/>"
+                    failure_message += "#{evaluation.desc}, but #{failure.message} "
                   end
                 end
 
