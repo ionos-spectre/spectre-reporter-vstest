@@ -102,6 +102,7 @@ module Spectre
               log_text = ''
               begin
                 log_text = message.dup.to_s
+                  .gsub(/[^[:print:]\n]/, '<np>') # Replace non printable characters
                   .force_encoding('ISO-8859-1')
                   .encode!('UTF-8')
               rescue StandardError
