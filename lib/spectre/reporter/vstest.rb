@@ -176,7 +176,7 @@ module Spectre
 
       def get_name run_info
         parent = run_info.parent
-        "[#{parent.name}] #{parent.full_desc}"
+        "[#{run_info.name}] #{parent.full_desc}"
       end
     end
   end
