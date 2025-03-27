@@ -19,4 +19,6 @@ Gem::Specification.new do |spec|
   spec.files        += Dir.glob('lib/**/*')
   spec.files        += Dir.glob('resources/**/*')
   spec.require_paths = ['lib']
+
+  spec.add_dependency 'spectre-core', '>= 2.0.0'
 end
